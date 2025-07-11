@@ -2,15 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>UPSC Online Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
-
   <div id="root"></div>
 
   <script type="text/babel">
@@ -21,23 +20,17 @@
       const [currentQuestion, setCurrentQuestion] = useState(0);
       const [answers, setAnswers] = useState({});
       const [timeLeft, setTimeLeft] = useState(7200);
-      const [showResult, setShowResult] = useState(false);
       const [testStarted, setTestStarted] = useState(false);
+      const [showResult, setShowResult] = useState(false);
 
       const questions = [
         {
-          id: 1,
-          question: "The Constitution of India was adopted on:",
-          options: ["26th January 1950", "26th November 1949", "15th August 1947", "26th January 1949"],
-          correct: 1
-        },
-        {
-          id: 2,
-          question: "Which of the following is NOT a feature borrowed from the British Constitution?",
-          options: ["Parliamentary system", "Rule of law", "Fundamental Rights", "Bicameral legislature"],
-          correct: 2
-        }
-            {
+      id: 1,
+      question: "The Constitution of India was adopted on:",
+      options: ["26th January 1950", "26th November 1949", "15th August 1947", "26th January 1949"],
+      correct: 1
+    },
+    {
       id: 2,
       question: "Which of the following is NOT a feature borrowed from the British Constitution?",
       options: ["Parliamentary system", "Rule of law", "Fundamental Rights", "Bicameral legislature"],
@@ -331,88 +324,65 @@
       options: ["President", "Prime Minister", "Members of Lok Sabha", "Members of Parliament"],
       correct: 2
     }
-
-      ];
+  ];
 
       useEffect(() => {
         let timer;
         if (testStarted && timeLeft > 0 && !showResult) {
-          timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
+          timer = setInterval(() => setTimeLeft((t) => t - 1), 1000);
         } else if (timeLeft === 0 && !showResult) {
-          handleSubmit();
+          setShowResult(true);
         }
         return () => clearInterval(timer);
       }, [testStarted, timeLeft, showResult]);
 
-      const formatTime = (seconds) => {
-        const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
-        const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
-        const s = String(seconds % 60).padStart(2, '0');
+      const formatTime = (sec) => {
+        const h = String(Math.floor(sec / 3600)).padStart(2, '0');
+        const m = String(Math.floor((sec % 3600) / 60)).padStart(2, '0');
+        const s = String(sec % 60).padStart(2, '0');
         return `${h}:${m}:${s}`;
-      };
-
-      const handleAnswerSelect = (questionId, index) => {
-        setAnswers(prev => ({ ...prev, [questionId]: index }));
       };
 
       const calculateScore = () => {
         let correct = 0, incorrect = 0, unanswered = 0;
         questions.forEach(q => {
-          const a = answers[q.id];
-          if (a === undefined) unanswered++;
-          else if (a === q.correct) correct++;
+          const ans = answers[q.id];
+          if (ans === undefined) unanswered++;
+          else if (ans === q.correct) correct++;
           else incorrect++;
         });
-        const pos = correct * 2;
-        const neg = incorrect * (2 / 3);
-        const final = pos - neg;
-        return {
-          correct, incorrect, unanswered,
-          positive: pos, negative: neg.toFixed(2),
-          final: final.toFixed(2),
-        };
+        const score = correct * 2 - incorrect * (2/3);
+        return { correct, incorrect, unanswered, score: score.toFixed(2) };
       };
 
-      const handleSubmit = () => setShowResult(true);
-      const resetTest = () => {
-        setCurrentQuestion(0);
-        setAnswers({});
-        setTimeLeft(7200);
-        setShowResult(false);
-        setTestStarted(false);
+      const handleAnswerSelect = (qid, index) => {
+        setAnswers(prev => ({ ...prev, [qid]: index }));
       };
 
       if (!testStarted) {
         return (
-          <div className="min-h-screen flex items-center justify-center">
-            <div className="bg-white p-8 rounded-lg shadow max-w-xl w-full">
-              <h1 className="text-2xl font-bold mb-4 text-blue-700">UPSC Online Test</h1>
-              <ul className="mb-4 text-sm list-disc list-inside text-gray-700">
-                <li>50 Questions (sample shown)</li>
-                <li>Time: 2 hours</li>
-                <li>+2 for correct, -0.66 for incorrect</li>
-                <li>No negative for skipped</li>
+          <div className="flex min-h-screen justify-center items-center">
+            <div className="bg-white p-6 rounded shadow max-w-lg w-full">
+              <h1 className="text-2xl font-bold mb-4">UPSC Test</h1>
+              <ul className="text-sm mb-4 list-disc list-inside">
+                <li>Duration: 2 hrs</li>
+                <li>+2 correct, -0.66 incorrect</li>
               </ul>
-              <button onClick={() => setTestStarted(true)} className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Start Test</button>
+              <button onClick={() => setTestStarted(true)} className="w-full bg-blue-600 text-white py-2 rounded">Start Test</button>
             </div>
           </div>
         );
       }
 
       if (showResult) {
-        const result = calculateScore();
+        const res = calculateScore();
         return (
-          <div className="p-6 max-w-3xl mx-auto bg-white rounded shadow mt-10">
-            <h2 className="text-xl font-bold mb-4 text-green-600">Test Results</h2>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>Correct: {result.correct}</div>
-              <div>Incorrect: {result.incorrect}</div>
-              <div>Unanswered: {result.unanswered}</div>
-              <div>+ Marks: {result.positive}</div>
-              <div>- Marks: {result.negative}</div>
-              <div className="col-span-2 font-bold text-lg">Final Score: {result.final}/100</div>
-            </div>
-            <button onClick={resetTest} className="mt-6 w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Retake Test</button>
+          <div className="p-6 max-w-2xl mx-auto mt-10 bg-white rounded shadow">
+            <h2 className="text-xl font-bold text-green-600 mb-4">Results</h2>
+            <p>Correct: {res.correct}</p>
+            <p>Incorrect: {res.incorrect}</p>
+            <p>Unanswered: {res.unanswered}</p>
+            <p className="font-bold mt-2">Score: {res.score} / {questions.length * 2}</p>
           </div>
         );
       }
@@ -420,32 +390,32 @@
       const q = questions[currentQuestion];
 
       return (
-        <div className="max-w-4xl mx-auto p-4">
+        <div className="max-w-3xl mx-auto p-4">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Time Left: ⏱ {formatTime(timeLeft)}</h2>
-            <button onClick={handleSubmit} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Submit Test</button>
+            <h2 className="text-lg font-bold">Time Left: ⏱ {formatTime(timeLeft)}</h2>
+            <button onClick={() => setShowResult(true)} className="bg-green-600 text-white px-4 py-2 rounded">Submit</button>
           </div>
           <div className="bg-white p-6 rounded shadow">
-            <h3 className="font-semibold mb-2">Q{currentQuestion + 1}: {q.question}</h3>
+            <h3 className="text-lg font-semibold mb-3">{q.question}</h3>
             <div className="space-y-2">
               {q.options.map((opt, i) => (
-                <label key={i} className={`block border p-2 rounded cursor-pointer ${answers[q.id] === i ? 'bg-blue-100 border-blue-500' : 'border-gray-300'}`}>
-                  <input type="radio" name={`q${q.id}`} className="mr-2" checked={answers[q.id] === i} onChange={() => handleAnswerSelect(q.id, i)} />
+                <label key={i} className={`block p-2 border rounded ${answers[q.id] === i ? 'bg-blue-100 border-blue-500' : 'border-gray-300'}`}>
+                  <input type="radio" className="mr-2" name={`q-${q.id}`} checked={answers[q.id] === i} onChange={() => handleAnswerSelect(q.id, i)} />
                   {String.fromCharCode(65 + i)}. {opt}
                 </label>
               ))}
             </div>
-            <div className="mt-4 flex justify-between">
-              <button disabled={currentQuestion === 0} onClick={() => setCurrentQuestion(c => c - 1)} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50">Prev</button>
-              <button disabled={currentQuestion === questions.length - 1} onClick={() => setCurrentQuestion(c => c + 1)} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50">Next</button>
+            <div className="flex justify-between mt-4">
+              <button disabled={currentQuestion === 0} onClick={() => setCurrentQuestion(q => q - 1)} className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50">Prev</button>
+              <button disabled={currentQuestion === questions.length - 1} onClick={() => setCurrentQuestion(q => q + 1)} className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50">Next</button>
             </div>
           </div>
         </div>
       );
     };
 
-    ReactDOM.createRoot(document.getElementById("root")).render(<UPSCOnlineTest />);
-
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<UPSCOnlineTest />);
   </script>
 </body>
 </html>
